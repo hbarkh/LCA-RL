@@ -1,2 +1,4 @@
 # Executables
 *.idea
+*.pyc
+.DS_Store
