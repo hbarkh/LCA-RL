@@ -1,5 +1,6 @@
 import os
 import gym
+import numpy as np
 import torch as th
 from LCAEnv7 import LCAEnv
 import matplotlib.pyplot as plt
@@ -62,19 +63,3 @@ results_plotter.plot_results([log_dir],1e10, results_plotter.X_EPISODES, "LCA En
 plt.show()
 
 plot_results(log_dir) # Smoothed results
-
-del model # remove to demonstrate saving and loading
-
-model = DQN.load("LCA Env 7")
-
-obs = env.reset()
-done = False
-
-while not done:
-    action, _states = model.predict(obs, deterministic=True)
-    obs, reward, done, info = env.step(action)
-
-
-    #env.render()
-    if done:
-      obs = env.reset()
