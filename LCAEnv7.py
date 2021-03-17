@@ -2378,11 +2378,11 @@ class LCAEnv(Env):
             
         #Can impose a heavy penalty into reward for iri exceeding limit
         #print(type(self.state.tolist()))
-        info = {'action':action,'total_cost':total_cost,'total_gwp':reward} #todo: modify this to return episode-wise by making cost, reward methods and appending during rest.
+        info = {'state':self.state,'action':action,'total_cost':total_cost,'total_gwp':reward} #todo: modify this to return episode-wise by making cost, reward methods and appending during rest.
         #adding state to this info dict breaks the whole thing
         self.info.append(info)
 
-        
+        reward = -total_cost
         # Return step information
         return self.state, reward, done, info
     
