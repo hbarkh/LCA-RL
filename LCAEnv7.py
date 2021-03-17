@@ -1554,8 +1554,8 @@ Log_asph_cost_mean, Log_agg_cost_mean, Log_milling_cost_mean, Log_overlay_cost_m
 for i in range(1000):
     Cost[i] = Get_Cost(Action, Pt)
 
-plt.hist(Cost, bins=50)
-plt.title('Histogram of costs for Action ' + str(Action))
+#plt.hist(Cost, bins=50)
+#plt.title('Histogram of costs for Action ' + str(Action))
 
 
 
@@ -1612,8 +1612,8 @@ for i in range(1000):
     Salvage[i] = Get_Salvage_Value(IRI, IRI_constructed, IRI_max, Age, T_last, C_last,
                                    SN, AADT, Percent_Small_Trucks, Percent_Medium_Trucks, Percent_Large_Trucks)
 
-plt.hist(Salvage, bins=50)
-plt.title('Histogram of salvage value for IRI ' + str(IRI))
+#plt.hist(Salvage, bins=50)
+#plt.title('Histogram of salvage value for IRI ' + str(IRI))
 
 
 
@@ -2534,7 +2534,7 @@ for x in range(0,50):
 # In[49]:
 
 
-episodes = 10
+episodes = 15
 full_gwp_list = []
 full_cost_list = []
 
@@ -2558,13 +2558,14 @@ for episode in range(1, episodes+1):
     cost = np.average(episode_cost_list)
     print('Episode:{} Score:{:.2f} Cost: {:.2f}'.format(episode, gwp,cost))
 
-    full_gwp_list.append(gwp/50)
-    full_cost_list.append(cost/50)
-    
-print('Overall average reward:{:.2f}'.format((np.average(full_gwp_list))))
-plt.plot(full_cost_list,label = 'total cost per episode /50',marker='.',linestyle='none')
-plt.plot(full_gwp_list,label = 'total gwp per episode /50',marker='.',linestyle='none')
-plt.legend()
+    full_gwp_list.append(gwp)
+    full_cost_list.append(cost)
+
+print('average gwp reward of {:.2f} episodes conducting random actions:{:.2f}'.format(episodes,(np.average(full_gwp_list))))
+print('average cost reward of {:.2f} episodes conducting random actions:{:.2f}'.format(episodes,(np.average(full_cost_list))))
+#plt.plot(full_cost_list,label = 'total cost per episode /50',marker='.',linestyle='none')
+#plt.plot(full_gwp_list,label = 'total gwp per episode /50',marker='.',linestyle='none')
+#plt.legend()
 #
 
 

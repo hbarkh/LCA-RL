@@ -22,7 +22,7 @@ def plot_results(log_folder, title='Learning Curve'):
     :param title: (str) the title of the task to plot
     """
     x, y = results_plotter.ts2xy(results_plotter.load_results(log_folder), 'timesteps')
-    y = moving_average(y, window=50)
+    y = moving_average(y, window=60)
     # Truncate x
     x = x[len(x) - len(y):]
 
@@ -30,5 +30,5 @@ def plot_results(log_folder, title='Learning Curve'):
     plt.plot(x, y)
     plt.xlabel('Number of Timesteps')
     plt.ylabel('Rewards')
-    plt.title(title + " Smoothed")
+    plt.title(title + "  - 50 Episode Moving Average")
     plt.show()
