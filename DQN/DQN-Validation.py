@@ -1,18 +1,22 @@
 import numpy as np
 import pandas as pd
-from LCAEnv7 import LCAEnv
+from LCAEnv7 import LCAEnv, rundate
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
 
 from stable_baselines3 import DQN
 
+model_dir = "DQN Model Saves/"
+results_dir = "DQN Results/"
+
+model_name = "LCA Env 7 2021-03-17 23'02''"
 
 env = LCAEnv()
-model = DQN.load("LCA Env 7")
+model = DQN.load(model_dir + model_name)
 
 # Reset and test in environment
-episodes = 200
+episodes = 120
 full_gwp_list = []
 full_cost_list = []
 full_info = []
@@ -25,7 +29,7 @@ for episode in range(1, episodes + 1):
 
     while not done:
         # env.render()
-        action, _states = model.predict(state, deterministic=True)
+        action, states = model.predict(state, deterministic=True)
         state, reward, done, info = env.step(action)
         #print(action,state)
         episode_gwp_list.append(reward)
@@ -34,7 +38,7 @@ for episode in range(1, episodes + 1):
 
     gwp = -np.average(episode_gwp_list)
     cost = np.average(episode_cost_list)
-    print('Episode:{} Score:{:.2f} Cost: {:.2f}'.format(episode, gwp, cost))
+    #print('Episode:{} Score:{:.2f} Cost: {:.2f}'.format(episode, gwp, cost))
 
     full_gwp_list.append(gwp)
     full_cost_list.append(cost)
@@ -66,6 +70,7 @@ ax2.xaxis.set_major_locator(MaxNLocator(integer=True))
 
 fig.suptitle("Testing Model Rewards")
 fig.legend()
+plt.savefig(results_dir + f"Testing Results {model_name}")
 plt.show()
 
 
@@ -73,4 +78,4 @@ plt.show()
 np.set_printoptions(formatter={'float_kind':'{:.2f}'.format}) # state array from scientific to .4f
 
 df_results = pd.DataFrame(full_info)
-df_results.to_csv("DQN Validation.csv",float_format='%.2f')
+df_results.to_csv(results_dir + f"DQN Validation {model_name}.csv",float_format='%.2f')

@@ -1,6 +1,7 @@
 import os
 import gym
 from LCAEnv7 import LCAEnv
+from HB_DQN5 import LCAEnv
 import torch as th
 
 from stable_baselines3 import PPO
@@ -42,7 +43,7 @@ if __name__ == '__main__':
     env = SubprocVecEnv([make_env(env_id, i) for i in range(num_cpu)])
 
     policy_kwargs = dict(activation_fn=th.nn.ReLU,
-                         net_arch=[dict(pi=[64, 64, 64], vf=[128, 128, 128])])
+                         net_arch=[dict(pi=[256, 256, 256], vf=[256, 256, 256])])
 
     kwargs = dict( learning_rate=0.0003,
                    n_steps=50,
@@ -65,8 +66,8 @@ if __name__ == '__main__':
 
     model = PPO("MlpPolicy", env, verbose=1 , **kwargs)
 
-    model.learn(total_timesteps=100000,eval_log_path = log_dir)
-    model.save("PPO LCAEnv7")
+    model.learn(total_timesteps=150000,eval_log_path = log_dir)
+    model.save("PPO LCAEnv5")
 
 
 

@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import gym
 from LCAEnv7 import LCAEnv
+from HB_DQN5 import LCAEnv
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
@@ -10,7 +11,7 @@ from stable_baselines3 import PPO
 
 
 env = LCAEnv()
-model = PPO.load("PPO LCAEnv7")
+model = PPO.load("PPO LCAEnv5")
 
 # Reset and test in environment
 episodes = 400
@@ -71,4 +72,4 @@ plt.show()
 np.set_printoptions(formatter={'float_kind':'{:.2f}'.format}) # state array from scientific to .4f
 
 df_results = pd.DataFrame(full_info)
-df_results.to_csv("TD3 Validation.csv",float_format='%.2f')
+df_results.to_csv("PPO Validation DQN5.csv",float_format='%.2f')

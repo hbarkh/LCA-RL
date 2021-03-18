@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from stable_baselines3.common import results_plotter
 
+results_dir = "DQN Results/"
 
 def moving_average(values, window):
     """
@@ -22,7 +23,7 @@ def plot_results(log_folder, title='Learning Curve'):
     :param title: (str) the title of the task to plot
     """
     x, y = results_plotter.ts2xy(results_plotter.load_results(log_folder), 'timesteps')
-    y = moving_average(y, window=60)
+    y = moving_average(y, window=5)
     # Truncate x
     x = x[len(x) - len(y):]
 
@@ -30,5 +31,6 @@ def plot_results(log_folder, title='Learning Curve'):
     plt.plot(x, y)
     plt.xlabel('Number of Timesteps')
     plt.ylabel('Rewards')
-    plt.title(title + "  - 50 Episode Moving Average")
+    plt.title(title + "  - 5 Episode Moving Average")
+    plt.savefig("5 ep MA.png")
     plt.show()
