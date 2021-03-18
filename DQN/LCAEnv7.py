@@ -2382,7 +2382,6 @@ class LCAEnv(Env):
         #adding state to this info dict breaks the whole thing
         self.info.append(info)
 
-        reward = -total_cost
         # Return step information
         return self.state, reward, done, info
     

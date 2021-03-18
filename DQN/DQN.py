@@ -2,7 +2,7 @@ import os
 import gym
 import numpy as np
 import torch as th
-from LCAEnv7 import LCAEnv, rundate
+from LCAEnv6 import LCAEnv, rundate
 import matplotlib.pyplot as plt
 
 from utils import plot_results
@@ -24,19 +24,19 @@ env = Monitor(env, log_dir)
 #  actor (pi), value function (vf), Q function (qf)
 #  ex. net_arch=[dict(pi=[32, 32], vf=[32, 32])])
 #  to have networks share architecture use only net_arch
-policy_kwargs = dict(activation_fn=th.nn.GELU, net_arch=[128, 128, 128, 128])
+policy_kwargs = dict(activation_fn=th.nn.GELU, net_arch=[256, 256, 256, 256])
 
 # Set Hyper Parameters
 hyper_parameters = dict(learning_rate=0.001,
                         buffer_size=1000000,
-                        learning_starts=2500,
-                        batch_size=2,
+                        learning_starts=500,
+                        batch_size=4,
                         tau=1.0, #1 for hard update
                         gamma=0.99,
-                        train_freq=(10, "step"),
+                        train_freq=(1, "episode"),
                         gradient_steps=1,
-                        target_update_interval=200,
-                        exploration_initial_eps=0.5,
+                        target_update_interval=10,
+                        exploration_initial_eps=0.3,
                         exploration_final_eps=0.001,
                         exploration_fraction=1,
                         max_grad_norm=10,
@@ -52,14 +52,15 @@ hyper_parameters = dict(learning_rate=0.001,
 model = DQN("MlpPolicy", env, policy_kwargs=policy_kwargs,**hyper_parameters)
 
 # Train Model
-model.learn(total_timesteps=50000, log_interval=5)
+n_Steps = 50000
+model.learn(total_timesteps=n_Steps, log_interval=5)
 
 # Save Model
-model.save(f"LCA Env 7 {rundate}")
+model.save(f"LCA Env 6 {rundate}")
 
 # Display results
-results_plotter.plot_results([log_dir],1e10, results_plotter.X_EPISODES, "LCA Env 7")
-plt.savefig("50000 steps figure.jpg")
+results_plotter.plot_results([log_dir],1e10, results_plotter.X_EPISODES, "LCA Env 6")
+plt.savefig(f"LCA Env 6 - {n_Steps}steps figure.jpg")
 plt.show()
 
 plot_results(log_dir) # Smoothed results

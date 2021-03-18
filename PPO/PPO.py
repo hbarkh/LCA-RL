@@ -1,17 +1,11 @@
 import os
 import gym
-import numpy as np
-import matplotlib.pyplot as plt
-from utils import plot_results
 from LCAEnv7 import LCAEnv
+import torch as th
 
 from stable_baselines3 import PPO
-from stable_baselines3.common.env_util import make_vec_env
-from stable_baselines3.common.monitor import Monitor
-from stable_baselines3.common import results_plotter
-from stable_baselines3.common.vec_env import DummyVecEnv, SubprocVecEnv
+from stable_baselines3.common.vec_env import SubprocVecEnv
 from stable_baselines3.common.utils import set_random_seed
-from stable_baselines3.common.evaluation import evaluate_policy
 
 from typing import Callable
 
@@ -43,14 +37,35 @@ if __name__ == '__main__':
 
 
     env_id = "LCAEnv "
-    num_cpu = 4  # Number of processes to use
+    num_cpu = 6  # Number of processes to use
     # Create the vectorized environment
     env = SubprocVecEnv([make_env(env_id, i) for i in range(num_cpu)])
 
+    policy_kwargs = dict(activation_fn=th.nn.ReLU,
+                         net_arch=[dict(pi=[64, 64, 64], vf=[128, 128, 128])])
+
+    kwargs = dict( learning_rate=0.0003,
+                   n_steps=50,
+                   batch_size=2,
+                   n_epochs=10,
+                   gamma=0.99,
+                   gae_lambda=0.95,
+                   clip_range=0.2,
+                   clip_range_vf=None,
+                   ent_coef=0.0,
+                   vf_coef=0.5,
+                   max_grad_norm=0.5,
+                   use_sde=False,
+                   sde_sample_freq=- 1,
+                   target_kl=None,
+                   create_eval_env=False,
+                   policy_kwargs=policy_kwargs,
+                   seed=None, )
 
 
-    model = PPO("MlpPolicy", env, verbose=1)
-    model.learn(total_timesteps=250000)
+    model = PPO("MlpPolicy", env, verbose=1 , **kwargs)
+
+    model.learn(total_timesteps=100000,eval_log_path = log_dir)
     model.save("PPO LCAEnv7")
 
 

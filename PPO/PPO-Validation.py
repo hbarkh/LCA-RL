@@ -13,7 +13,7 @@ env = LCAEnv()
 model = PPO.load("PPO LCAEnv7")
 
 # Reset and test in environment
-episodes = 10
+episodes = 400
 full_gwp_list = []
 full_cost_list = []
 full_info = []
@@ -33,9 +33,9 @@ for episode in range(1, episodes + 1):
         episode_cost_list.append(info['total_cost'])
         full_info.append(info)
 
-    gwp = -np.average(episode_gwp_list)
+    gwp = np.average(episode_gwp_list)
     cost = np.average(episode_cost_list)
-    print('Episode:{} Score:{:.2f} Cost: {:.2f}'.format(episode, gwp, cost))
+    #print('Episode:{} Score:{:.2f} Cost: {:.2f}'.format(episode, gwp, cost))
 
     full_gwp_list.append(gwp)
     full_cost_list.append(cost)
