@@ -2491,9 +2491,10 @@ class LCAEnv(Env):
         self.age = 0
         self.sn = SN_initial
         self.iri = IRI_constructed
+        self.aadtt = AADTT_INITIAL
+        self.pt = 100
         
         #Other variables
-        self.pt = 100
         self.prev_err = 0
         self.c_last = 60000
 
