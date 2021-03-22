@@ -1,8 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from stable_baselines3.common import results_plotter
+import datetime
 
 results_dir = "DQN Results/"
+rundate = str(datetime.datetime.now().strftime("%Y-%m-%d %H'%M''"))
 
 def moving_average(values, window):
     """
@@ -32,5 +34,5 @@ def plot_results(log_folder, title='Learning Curve'):
     plt.xlabel('Number of Timesteps')
     plt.ylabel('Rewards')
     plt.title(title + "  - 5 Episode Moving Average")
-    plt.savefig("5 ep MA.png")
+    plt.savefig(results_dir + f"5 ep MA {rundate} .png")
     plt.show()

@@ -2387,7 +2387,12 @@ class LCAEnv(Env):
     
     def reward_calc(self, state, action):
 
-        
+        # Must pull these local varibles in reward calc or make them class methods
+        percent_lt = self.traffic_dict['percent_lt']
+        percent_mt = self.traffic_dict['percent_mt']
+        percent_ht = self.traffic_dict['percent_ht']
+        AADT = self.traffic_dict['AADT']
+
         #Global Warming Potential Calculations
         lighting,albedo,roughness,deflection,embodied,eol,congestion = (0,0,0,0,0,0,0)
         
@@ -2411,12 +2416,7 @@ class LCAEnv(Env):
         
         #Dollar Cost Calculations, for now bundle all costs together        
         ## total cost = sum(construction or maintenance,salvage)
-        
-        #Must pull these local varibles in reward calc or make them class methods
-        percent_lt = self.traffic_dict['percent_lt']
-        percent_mt = self.traffic_dict['percent_mt']
-        percent_ht = self.traffic_dict['percent_ht']
-        
+
         
         if action < 6: #todo: this if statement will be combined with above later, seperate for now.
             self.c_last = (1/(1+Discount_Rate)**self.t) * Get_Cost(action, self.pt) # discounted cost

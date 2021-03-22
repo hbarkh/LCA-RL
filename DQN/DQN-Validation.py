@@ -10,13 +10,13 @@ from stable_baselines3 import DQN
 model_dir = "DQN Model Saves/"
 results_dir = "DQN Results/"
 
-model_name = "LCA Env 7 2021-03-19 09'54''"
+model_name = "LCA Env 7 2021-03-22 12'05''"
 
 env = LCAEnv()
 model = DQN.load(model_dir + model_name)
 
 # Reset and test in environment
-episodes = 250
+episodes = 200
 full_gwp_list = []
 full_cost_list = []
 full_info = []
