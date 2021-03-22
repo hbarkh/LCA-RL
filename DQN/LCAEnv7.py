@@ -2258,6 +2258,10 @@ def discritize_state(state):
 
 discritize_state(np.array([20.8,8.4,0.32,3.5,3,884.455,264.568]))
 
+def normalize(score,min,max):
+    return 100*(score-min)/(max-min)
+
+
 
 # # Reinforcement Learning
 
@@ -2346,7 +2350,7 @@ class LCAEnv(Env):
             self.age = 0
             self.T_last = 0 #todo: what is T_last?
             self.t += 1
-            self.sn = SN_States[action]
+            self.sn = SN_STATES[action]
             self.iri = IRI_constructed
         elif action < 6:
             self.age += 1
@@ -2437,6 +2441,8 @@ class LCAEnv(Env):
         #print("albedo,",albedo)      
         #print("roughness,",roughness)
         #print("deflection,",deflection)
+        #reward = normalize(reward,0.1e6,2e7) #todo: remove this if it does not help march 22nd 2021
+        reward = reward/1e6 #scale rewards
         reward = -reward #minimize gwp
         
         
