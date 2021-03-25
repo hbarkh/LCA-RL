@@ -10,13 +10,13 @@ from stable_baselines3 import DQN
 model_dir = "DQN Model Saves/"
 results_dir = "DQN Results/"
 
-model_name = "LCA Env 7 2021-03-22 12'05''"
+model_name = "LCA Env 7 2021-03-24 22'35''"
 
 env = LCAEnv()
 model = DQN.load(model_dir + model_name)
 
 # Reset and test in environment
-episodes = 200
+episodes = 250
 full_gwp_list = []
 full_cost_list = []
 full_info = []
@@ -32,7 +32,7 @@ for episode in range(1, episodes + 1):
         action, states = model.predict(state, deterministic=True)
         state, reward, done, info = env.step(action)
         #print(action,state)
-        episode_gwp_list.append(reward)
+        episode_gwp_list.append(info['total_gwp'])
         episode_cost_list.append(info['total_cost'])
         full_info.append(info)
 

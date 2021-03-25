@@ -1,7 +1,6 @@
 import os
 import gym
-from LCAEnv7 import LCAEnv
-from HB_DQN5 import LCAEnv
+from LCAEnv6 import LCAEnv
 import torch as th
 
 from stable_baselines3 import PPO
@@ -47,7 +46,7 @@ if __name__ == '__main__':
 
     kwargs = dict( learning_rate=0.0003,
                    n_steps=50,
-                   batch_size=2,
+                   batch_size=2, #todo: increase batch size to 32
                    n_epochs=10,
                    gamma=0.99,
                    gae_lambda=0.95,
@@ -66,8 +65,8 @@ if __name__ == '__main__':
 
     model = PPO("MlpPolicy", env, verbose=1 , **kwargs)
 
-    model.learn(total_timesteps=150000,eval_log_path = log_dir)
-    model.save("PPO LCAEnv5")
+    model.learn(total_timesteps=50000,eval_log_path = log_dir)
+    model.save("PPO LCAEnv7")
 
 
 

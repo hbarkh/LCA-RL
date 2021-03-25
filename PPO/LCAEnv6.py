@@ -2287,9 +2287,8 @@ class LCAEnv(Env):
         self.action_space = Discrete(7) #0-6
         # States array
         # time, age, sn, iri, scenario, aadtt, pt
-        self.observation_space = Box(low=np.array([0,0,3.43,1.36,0,8,0.9]), high=np.array([50,50,6.37,3.76,6,12,2.5]))
+        self.observation_space = Box(low=np.array([0,0,3.43,1.36,0,8]), high=np.array([50,50,6.37,3.76,6,12]))
         #800 - 12000 aadtt
-        #90 to 250 price index
         
         # For discrete space use:
         # MultiDiscrete
@@ -2320,7 +2319,7 @@ class LCAEnv(Env):
         
         
         #Set State Array
-        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/100,self.pt/100])
+        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/100])
         
         #information accumulator
         self.info = []
@@ -2369,7 +2368,7 @@ class LCAEnv(Env):
         
         # Calculate reward
         #print("before reward, state is:",self.state,action)
-        reward,total_cost,total_gwp = self.reward_calc(self.state,action)
+        reward,total_cost = self.reward_calc(self.state,action)
         #print(f"internal reward {reward}")
         
         #check if done
@@ -2381,12 +2380,12 @@ class LCAEnv(Env):
             
         #Can impose a heavy penalty into reward for iri exceeding limit
         #print(type(self.state.tolist()))
-        info = {'state':self.state,'action':action,'total_cost':total_cost,'total_gwp':total_gwp} #todo: modify this to return episode-wise by making cost, reward methods and appending during rest.
+        info = {'state':self.state,'action':action,'total_cost':total_cost,'total_gwp':reward} #todo: modify this to return episode-wise by making cost, reward methods and appending during rest.
         #adding state to this info dict breaks the whole thing
         self.info.append(info)
 
         #store state
-        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/100,self.pt/100])
+        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/100])
 
         # Return step information
         return self.state, reward, done, info
@@ -2438,19 +2437,19 @@ class LCAEnv(Env):
           
 
         #calculate gwp
-        total_gwp = lighting+albedo+roughness+deflection+embodied+eol+congestion
+        reward = lighting+albedo+roughness+deflection+embodied+eol+congestion
         #print("lighting,",lighting)
         #print("albedo,",albedo)      
         #print("roughness,",roughness)
         #print("deflection,",deflection)
         #reward = normalize(reward,0.1e6,2e7) #todo: remove this if it does not help march 22nd 2021
-        reward = 0.5*total_gwp/1e6 + 0.5*total_cost/1e5 #scale rewards
+        reward = reward/1e6 #scale rewards
         reward = -reward #minimize gwp
         
         
         #GLOBAL WARMING POTENTIAL CALCULATIONS
 
-        return reward,total_cost, total_gwp
+        return reward,total_cost #minimize gwp!
 
     def render(self):
         
@@ -2512,7 +2511,7 @@ class LCAEnv(Env):
         
         
         #Set State Array
-        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/100, self.pt/100])
+        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/100])
         
         
         

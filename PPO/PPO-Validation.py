@@ -1,8 +1,7 @@
 import numpy as np
 import pandas as pd
 import gym
-from LCAEnv7 import LCAEnv
-from HB_DQN5 import LCAEnv
+from LCAEnv6 import LCAEnv
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 
@@ -11,10 +10,10 @@ from stable_baselines3 import PPO
 
 
 env = LCAEnv()
-model = PPO.load("PPO LCAEnv5")
+model = PPO.load("PPO LCAEnv7")
 
 # Reset and test in environment
-episodes = 400
+episodes = 200
 full_gwp_list = []
 full_cost_list = []
 full_info = []
@@ -30,7 +29,7 @@ for episode in range(1, episodes + 1):
         action, _states = model.predict(state, deterministic=True)
         state, reward, done, info = env.step(action)
         #print(action,state)
-        episode_gwp_list.append(reward)
+        episode_gwp_list.append(reward * 1e6)
         episode_cost_list.append(info['total_cost'])
         full_info.append(info)
 
@@ -72,4 +71,4 @@ plt.show()
 np.set_printoptions(formatter={'float_kind':'{:.2f}'.format}) # state array from scientific to .4f
 
 df_results = pd.DataFrame(full_info)
-df_results.to_csv("PPO Validation DQN5.csv",float_format='%.2f')
+df_results.to_csv("PPO Validation DQN7.csv",float_format='%.2f')

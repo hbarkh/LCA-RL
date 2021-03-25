@@ -2258,6 +2258,10 @@ def discritize_state(state):
 
 discritize_state(np.array([20.8,8.4,0.32,3.5,3,884.455,264.568]))
 
+def normalize(score,min,max):
+    return 100*(score-min)/(max-min)
+
+
 
 # # Reinforcement Learning
 
@@ -2283,7 +2287,8 @@ class LCAEnv(Env):
         self.action_space = Discrete(7) #0-6
         # States array
         # time, age, sn, iri, scenario, aadtt, pt
-        self.observation_space = Box(low=np.array([0,0,3.43,1.36,0,800,100]), high=np.array([50,50,6.37,3.76,6,1200,270]))
+        self.observation_space = Box(low=np.array([0,0,3.43,1.36,0,8]), high=np.array([50,50,6.37,3.76,6,12]))
+        #800 - 12000 aadtt
         
         # For discrete space use:
         # MultiDiscrete
@@ -2314,7 +2319,7 @@ class LCAEnv(Env):
         
         
         #Set State Array
-        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt,self.pt])
+        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/100])
         
         #information accumulator
         self.info = []
@@ -2346,7 +2351,7 @@ class LCAEnv(Env):
             self.age = 0
             self.T_last = 0 #todo: what is T_last?
             self.t += 1
-            self.sn = SN_States[action]
+            self.sn = SN_STATES[action]
             self.iri = IRI_constructed
         elif action < 6:
             self.age += 1
@@ -2359,9 +2364,6 @@ class LCAEnv(Env):
             self.t += 1
             self.iri += 0.08*math.log(self.age)*math.log((percent_lt+percent_mt+percent_ht)*AADT/2)*pow(self.sn,-2.5)+np.random.normal(0,0.05)
 
-
-        #store state    
-        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt,self.pt])
         
         
         # Calculate reward
@@ -2382,13 +2384,20 @@ class LCAEnv(Env):
         #adding state to this info dict breaks the whole thing
         self.info.append(info)
 
-        
+        #store state
+        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/100])
+
         # Return step information
         return self.state, reward, done, info
     
     def reward_calc(self, state, action):
 
-        
+        # Must pull these local varibles in reward calc or make them class methods
+        percent_lt = self.traffic_dict['percent_lt']
+        percent_mt = self.traffic_dict['percent_mt']
+        percent_ht = self.traffic_dict['percent_ht']
+        AADT = self.traffic_dict['AADT']
+
         #Global Warming Potential Calculations
         lighting,albedo,roughness,deflection,embodied,eol,congestion = (0,0,0,0,0,0,0)
         
@@ -2412,12 +2421,7 @@ class LCAEnv(Env):
         
         #Dollar Cost Calculations, for now bundle all costs together        
         ## total cost = sum(construction or maintenance,salvage)
-        
-        #Must pull these local varibles in reward calc or make them class methods
-        percent_lt = self.traffic_dict['percent_lt']
-        percent_mt = self.traffic_dict['percent_mt']
-        percent_ht = self.traffic_dict['percent_ht']
-        
+
         
         if action < 6: #todo: this if statement will be combined with above later, seperate for now.
             self.c_last = (1/(1+Discount_Rate)**self.t) * Get_Cost(action, self.pt) # discounted cost
@@ -2438,6 +2442,8 @@ class LCAEnv(Env):
         #print("albedo,",albedo)      
         #print("roughness,",roughness)
         #print("deflection,",deflection)
+        #reward = normalize(reward,0.1e6,2e7) #todo: remove this if it does not help march 22nd 2021
+        reward = reward/1e6 #scale rewards
         reward = -reward #minimize gwp
         
         
@@ -2492,9 +2498,10 @@ class LCAEnv(Env):
         self.age = 0
         self.sn = SN_initial
         self.iri = IRI_constructed
+        self.aadtt = AADTT_INITIAL
+        self.pt = 100
         
         #Other variables
-        self.pt = 100
         self.prev_err = 0
         self.c_last = 60000
 
@@ -2504,7 +2511,7 @@ class LCAEnv(Env):
         
         
         #Set State Array
-        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt,self.pt])
+        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/100])
         
         
         
