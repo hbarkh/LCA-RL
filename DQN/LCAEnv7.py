@@ -2066,11 +2066,11 @@ Speed_Limit = 65  # mph
 
 # Based on FHWA VMT Stats 2018
 AADT_INITIAL = 81289
-AADTT_INITIAL = 800
 PERCENT_LT_INITIAL = 0.19
 PERCENT_MT_INITIAL = 0.04
 PERCENT_HT_INITIAL = 0.09
-PERCENT_PC_INITIAL = 1 -     sum([PERCENT_LT_INITIAL, PERCENT_MT_INITIAL, PERCENT_HT_INITIAL])
+PERCENT_PC_INITIAL = 1 - sum([PERCENT_LT_INITIAL, PERCENT_MT_INITIAL, PERCENT_HT_INITIAL])
+AADTT_INITIAL = AADT_INITIAL * (1-PERCENT_PC_INITIAL)
 
 # Axle loads all in Newtons
 Pavement_Stiffness = 8000  # MPa
@@ -2310,9 +2310,9 @@ class LCAEnv(Env):
         self.sn = SN_initial
         self.iri = IRI_constructed
         self.aadtt = AADTT_INITIAL
+        self.pt = 100
         
         #Other variables
-        self.pt = 100
         self.prev_err = 0
         self.c_last = 60000
 
@@ -2320,7 +2320,7 @@ class LCAEnv(Env):
         
         
         #Set State Array
-        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/100,self.pt/100])
+        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/1e4,self.pt/100])
         
         #information accumulator
         self.info = []
@@ -2350,7 +2350,7 @@ class LCAEnv(Env):
 
         if action < 5:
             self.age = 0
-            self.T_last = 0 #todo: what is T_last?
+            self.T_last = 0
             self.t += 1
             self.sn = SN_STATES[action]
             self.iri = IRI_constructed
@@ -2386,7 +2386,7 @@ class LCAEnv(Env):
         self.info.append(info)
 
         #store state
-        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/100,self.pt/100])
+        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/1e4,self.pt/100])
 
         # Return step information
         return self.state, reward, done, info
@@ -2404,11 +2404,10 @@ class LCAEnv(Env):
         
         lighting = Get_Lighting_GWP(SA)
         albedo = Get_Albedo_GWP(Geographic_Location, Current_Albedo, SA)
-        #print("speed limit,"Speed_Limit)
         roughness = Get_Roughness_GWP(self.iri, Speed_Limit, self.traffic_dict, Highway_Length)
         deflection = Get_Deflection_GWP(self.traffic_dict, Highway_Length, self.excess_energy_factor, self.sn)
-        
-        if self.t == 0:            
+
+        if self.t == 0:
             embodied = Get_Embodied_GWP(Embodied_GWP_Parameters, action+1)
         elif self.t == ANALYSIS_PERIOD:
             eol = Get_Excavation_GWP(self.sn, Lane_Width, Highway_Length, Number_Lanes, Volume_Mass_Density, True)
@@ -2439,12 +2438,8 @@ class LCAEnv(Env):
 
         #calculate gwp
         total_gwp = lighting+albedo+roughness+deflection+embodied+eol+congestion
-        #print("lighting,",lighting)
-        #print("albedo,",albedo)      
-        #print("roughness,",roughness)
-        #print("deflection,",deflection)
-        #reward = normalize(reward,0.1e6,2e7) #todo: remove this if it does not help march 22nd 2021
-        reward = 0.5*total_gwp/1e6 + 0.5*total_cost/1e5 #scale rewards
+
+        reward = total_gwp/1e6
         reward = -reward #minimize gwp
         
         
@@ -2512,7 +2507,7 @@ class LCAEnv(Env):
         
         
         #Set State Array
-        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/100, self.pt/100])
+        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/1e4, self.pt/100])
         
         
         
