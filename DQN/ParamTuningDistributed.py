@@ -1,25 +1,25 @@
 import os
+import sys
 import optuna
-from optuna.visualization import plot_optimization_history, plot_parallel_coordinate
-from optuna.visualization import plot_param_importances, plot_pareto_front
-from optuna.study import StudyDirection
-import numpy as np
 import torch as th
-from LCAEnv7 import LCAEnv, rundate
-import matplotlib.pyplot as plt
-import pandas as pd
-
-from utils import plot_results
-
+from LCAEnv7 import LCAEnv
 from stable_baselines3 import DQN
 from stable_baselines3.common.monitor import Monitor
 from stable_baselines3.common.evaluation import evaluate_policy
-## todo: try optuna.samplers.NSGAIISampler
-## Using Gaussian process because hyperparams are probably correlated
-log_dir = "/tmp/DQN-LCAEnv/"
+
+"""
+This version of param tuning simply removes plots and disables printing
+It will be called from another python file to run in parallel
+Optuna when connected to a database and pointed to study
+recognizes the past trials, does its magic, learns from past trials,
+and writes to new trials. Voila
+"""
+# Disable print statement
+sys.stdout = open(os.devnull, 'w')
+
+
 param_dir = "Param Tuning Results/"
 
-os.makedirs(log_dir, exist_ok=True)
 
 
 def objective(trial):
@@ -29,7 +29,7 @@ def objective(trial):
     """
 
     env = LCAEnv()
-    env = Monitor(env, log_dir)
+    env = Monitor(env)
 
     lr_opt = trial.suggest_float("learning_rate", 0.00005,0.001)
     neurons_opt = trial.suggest_categorical("hidden_layer_neurons", [128, 256, 512])
@@ -62,12 +62,12 @@ def objective(trial):
 
     model = DQN("MlpPolicy", env, policy_kwargs=policy_kwargs, **hyper_parameters)
 
-    n_Steps = 800 #90,000
-    model.learn(total_timesteps=n_Steps, log_interval=1000)
+    n_Steps = 90000
+    model.learn(total_timesteps=n_Steps, log_interval=None)
 
 
     # Validate the model
-    reward_mean, reward_std = evaluate_policy(model, env, n_eval_episodes=8) # 800 episodes
+    reward_mean, reward_std = evaluate_policy(model, env, n_eval_episodes=1000)
 
     # Return validation to optuna to select next env
     return reward_mean
@@ -79,19 +79,4 @@ if __name__ == "__main__":
                                 study_name= f'DQN7 Study 1',
                                 load_if_exists=True)
 
-    study.optimize(objective, n_trials= 30)
-
-
-
-# Name the script to run, and execute in parallel
-from multiprocessing import Pool
-
-processes = ('ParamTuningDistributed.py')
-
-
-def run_process(process):
-    os.system('python {}'.format(process))
-
-
-pool = Pool(processes=3)
-pool.map(run_process, processes)
+    study.optimize(objective, n_trials= 10)

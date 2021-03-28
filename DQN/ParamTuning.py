@@ -62,12 +62,12 @@ def objective(trial):
 
     model = DQN("MlpPolicy", env, policy_kwargs=policy_kwargs, **hyper_parameters)
 
-    n_Steps = 500 #90,000
+    n_Steps = 90000
     model.learn(total_timesteps=n_Steps, log_interval=1000)
 
 
     # Validate the model
-    reward_mean, reward_std = evaluate_policy(model, env, n_eval_episodes=8) # 800 episodes
+    reward_mean, reward_std = evaluate_policy(model, env, n_eval_episodes=1000)
 
     # Return validation to optuna to select next env
     return reward_mean
@@ -98,4 +98,4 @@ df_study = pd.DataFrame(data = study.get_trials())
 df_study.to_csv(param_dir + f"Trials History {rundate}.csv")
 
 
-# optuna.delete_study(study_name="example-study", storage="sqlite:///HyperParamStudies.db"")
+#optuna.delete_study(study_name="DQN7 Study xxxx", storage="sqlite:///HyperParamStudies.db")
