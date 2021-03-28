@@ -62,7 +62,7 @@ def objective(trial):
 
     model = DQN("MlpPolicy", env, policy_kwargs=policy_kwargs, **hyper_parameters)
 
-    n_Steps = 500 #90,000
+    n_Steps = 800 #90,000
     model.learn(total_timesteps=n_Steps, log_interval=1000)
 
 
@@ -73,29 +73,25 @@ def objective(trial):
     return reward_mean
 
 
+if __name__ == "__main__":
+    study = optuna.create_study(direction="maximize",
+                                storage= "sqlite:///HyperParamStudies.db",
+                                study_name= f'DQN7 Study 1',
+                                load_if_exists=True)
 
-study = optuna.create_study(direction="maximize",
-                            storage= "sqlite:///HyperParamStudies.db",
-                            study_name= f'DQN7 Study 1',
-                            load_if_exists=True)
-
-study.optimize(objective, n_trials= 4)
-
-# Note: uses plotly not matplotlib
-fig = plot_parallel_coordinate(study)
-fig.write_html(param_dir + f'parallel coordinates {rundate}.html' )
-fig.show()
-
-fig = plot_optimization_history(study)
-fig.write_html(param_dir + f'optimization history {rundate}.html')
-fig.show()
-
-fig = plot_param_importances(study)
-fig.write_html(param_dir + f'Param importances  {rundate}.html') # for bi or tri-objective studies
-fig.show()
-
-df_study = pd.DataFrame(data = study.get_trials())
-df_study.to_csv(param_dir + f"Trials History {rundate}.csv")
+    study.optimize(objective, n_trials= 30)
 
 
-# optuna.delete_study(study_name="example-study", storage="sqlite:///HyperParamStudies.db"")
+
+# Name the script to run, and execute in parallel
+from multiprocessing import Pool
+
+processes = ('ParamTuningDistributed.py')
+
+
+def run_process(process):
+    os.system('python {}'.format(process))
+
+
+pool = Pool(processes=3)
+pool.map(run_process, processes)
