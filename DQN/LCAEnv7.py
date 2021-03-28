@@ -14,6 +14,7 @@ from numpy import math
 import pandas as pd
 import numpy as np
 import os
+import copy
 
 
 rundate = str(datetime.datetime.now().strftime("%Y-%m-%d %H'%M''"))
@@ -1806,7 +1807,7 @@ def Perform_LCA(IRI_max, traffic_dict, GWP_Q_Table, Cost_Q_Table, w_GWP, w_Cost,
                 # gal_per_mile_HDV=gal_per_mile_LDV/(1+Fuel_Economy_Improvement)
                 Fuel_Economy_Improvement = 0
                 # We use this to incorporate fuel economy improvements into the deflection function - assume energy consumption scales the same as FE improvements
-                excess_energy_factor = excess_energy_factor /                     (1+Fuel_Economy_Improvement)
+                excess_energy_factor = excess_energy_factor / (1+Fuel_Economy_Improvement)
                 ## THIS IS NOT BEING USED CAN MOVE INTO GET_EMISSIONS ##
 
                 # Uncertain cost growth over time
@@ -2258,7 +2259,7 @@ def discritize_state(state):
 
 discritize_state(np.array([20.8,8.4,0.32,3.5,3,884.455,264.568]))
 
-def normalize(score,min,max):
+def scale_max_min(score,min,max):
     return 100*(score-min)/(max-min)
 
 
@@ -2286,10 +2287,9 @@ class LCAEnv(Env):
         # Actions we can take
         self.action_space = Discrete(7) #0-6
         # States array
-        # time, age, sn, iri, scenario, aadtt, pt
-        self.observation_space = Box(low=np.array([0,0,3.43,1.36,0,8,0.9]), high=np.array([50,50,6.37,3.76,6,12,2.5]))
-        #800 - 12000 aadtt
-        #90 to 250 price index
+        # time = [0:50]/50, age = [0:50]/50, sn = [3.65,4.44,5.22,6.00,6.37]/6.37 , iri = [1.36:3.76]/3.76 , scenario = [0:5]/5, aadt = aadtt/aadt_initial, pt = [90:250]/250
+        self.observation_space = Box(low=np.array([0,0,3.65/6.37,1.36/3.76,1/6,AADTT_INITIAL/AADT_INITIAL,0.36]), high=np.array([1,1,1,1,1,1,1]))
+
         
         # For discrete space use:
         # MultiDiscrete
@@ -2307,20 +2307,38 @@ class LCAEnv(Env):
         #State variables
         self.t = 0
         self.age = 0
-        self.sn = SN_initial
+        self.sn = 3.65
         self.iri = IRI_constructed
         self.aadtt = AADTT_INITIAL
         self.pt = 100
         
         #Other variables
+        """
+        Strictly speaking probably don't need these as RL agents start by calling env.reset() first
+        But good to have just in case anyone initializes without env.reset()
+        """
         self.prev_err = 0
         self.c_last = 60000
+
+        self.excess_energy_factor = excess_energy_factor_initial
+
+        self.traffic_dict['AADT'] = AADT_INITIAL
+        self.traffic_dict['AADTT'] = AADTT_INITIAL
+        self.traffic_dict['AADT_mean'] = AADT_MEAN_INITIAL
+        self.traffic_dict['AADT_sd'] = AADT_SD_INITIAL
+        self.rho = 1
+        self.traffic_dict['percent_pc'] = PERCENT_PC_INITIAL
+        self.traffic_dict['percent_lt'] = PERCENT_LT_INITIAL
+        self.traffic_dict['percent_mt'] = PERCENT_MT_INITIAL
+        self.traffic_dict['percent_ht'] = PERCENT_HT_INITIAL
+        self.traffic_dict['percent_trucks_impacted'] = PERCENT_TRUCKS_IMPACTED_INITIAL
+        self.traffic_dict['percent_non_trucks_impacted'] = PERCENT_NON_TRUCKS_IMPACTED_INITIAL
 
         Get_Truck_Weights()
         
         
         #Set State Array
-        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/1e4,self.pt/100])
+        self.state = np.array([self.t/50,self.age/50,self.sn/6.37,self.iri/3.76,self.scen/6,self.aadtt/AADT_INITIAL,self.pt/250])
         
         #information accumulator
         self.info = []
@@ -2386,7 +2404,7 @@ class LCAEnv(Env):
         self.info.append(info)
 
         #store state
-        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/1e4,self.pt/100])
+        self.state = np.array([self.t/50,self.age/50,self.sn/6.37,self.iri/3.76,self.scen/6,self.aadtt/AADT_INITIAL,self.pt/250])
 
         # Return step information
         return self.state, reward, done, info
@@ -2445,7 +2463,7 @@ class LCAEnv(Env):
         
         #GLOBAL WARMING POTENTIAL CALCULATIONS
 
-        return reward,total_cost, total_gwp
+        return reward, total_cost, total_gwp
 
     def render(self):
         
@@ -2507,7 +2525,7 @@ class LCAEnv(Env):
         
         
         #Set State Array
-        self.state = np.array([self.t,self.age,self.sn,self.iri,self.scen,self.aadtt/1e4, self.pt/100])
+        self.state = np.array([self.t/50,self.age/50,self.sn/6.37,self.iri/3.76,self.scen/6,self.aadtt/AADT_INITIAL, self.pt/250])
         
         
         
@@ -2527,17 +2545,17 @@ env = LCAEnv()
 
 # In[48]:
 
-
-
+"""
+## Testing Environment Variables Correctly Defined?
 print("RANDOM SAMPLES OF ACTION AND ENVIRONMENT ARE INDEPENDENT.\nJust sampling to make sure we can call every action and space")
-for x in range(0,50):
+for x in range(0,25):
     print("action:", env.action_space.sample(),"Environment:",env.observation_space.sample())
 
-
+"""
 # In[49]:
 
 
-episodes = 15
+episodes = 10
 full_gwp_list = []
 full_cost_list = []
 
@@ -2552,7 +2570,7 @@ for episode in range(1, episodes+1):
         #env.render()
         action = env.action_space.sample()
         n_state, reward, done, info = env.step(action)
-        #print(action,n_state)
+        print(action,n_state)
         episode_gwp_list.append(reward)
         episode_cost_list.append(info['total_cost'])
         full_info.append(info)
@@ -2570,14 +2588,6 @@ print('average cost reward of {:.2f} episodes conducting random actions:{:.2f}'.
 #plt.plot(full_gwp_list,label = 'total gwp per episode /50',marker='.',linestyle='none')
 #plt.legend()
 #
-
-
-# In[50]:
-
-
-import gym
-
-
 
 
 # In[52]:

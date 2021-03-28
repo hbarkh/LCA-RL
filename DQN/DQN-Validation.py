@@ -10,7 +10,7 @@ from stable_baselines3 import DQN
 model_dir = "DQN Model Saves/"
 results_dir = "DQN Results/"
 
-model_name = "LCA Env 7 2021-03-25 18'24'"
+model_name = "LCA Env 7 tuned 2021-03-27 19'20''"
 
 env = LCAEnv()
 model = DQN.load(model_dir + model_name)
