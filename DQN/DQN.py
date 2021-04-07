@@ -28,18 +28,18 @@ env = Monitor(env, log_dir)
 #  actor (pi), value function (vf), Q function (qf)
 #  ex. net_arch=[dict(pi=[32, 32], vf=[32, 32])])
 #  to have networks share architecture use only net_arch
-policy_kwargs = dict(activation_fn=th.nn.GELU, net_arch=[128,128,128])
+policy_kwargs = dict(activation_fn=th.nn.GELU, net_arch=[512,512,512])
 
 # Set Hyper Parameters
-hyper_parameters = dict(learning_rate=0.00008,
-                        buffer_size=100000,
+hyper_parameters = dict(learning_rate=0.00086,
+                        buffer_size=50000,
                         learning_starts=2000,
-                        batch_size=50,
+                        batch_size=16,
                         tau=1, #1 for hard update
-                        gamma=0.99,
-                        train_freq=(1, "step"),
+                        gamma=0.9,
+                        train_freq=(20, "step"),
                         gradient_steps=-1, #changed to -1 from 1
-                        target_update_interval=20000,
+                        target_update_interval=10,
                         exploration_initial_eps=0.3,
                         exploration_final_eps=0.001,
                         exploration_fraction=0.95,
@@ -56,7 +56,7 @@ hyper_parameters = dict(learning_rate=0.00008,
 model = DQN("MlpPolicy", env, policy_kwargs=policy_kwargs,**hyper_parameters)
 
 # Train Model
-n_Steps = 50000
+n_Steps = 90000
 model.learn(total_timesteps=n_Steps, log_interval=1)
 
 # Save Model

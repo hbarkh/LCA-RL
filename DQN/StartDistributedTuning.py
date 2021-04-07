@@ -2,7 +2,7 @@ from multiprocessing import Pool
 import os
 
 # Run Multi Processes
-num_processes = 4
+num_processes = 2
 processes = ('ParamTuningDistributed.py',) * num_processes
 
 
@@ -25,7 +25,7 @@ rundate = str(datetime.datetime.now().strftime("%Y-%m-%d %H'%M''"))
 param_dir = "Param Tuning Results/"
 os.makedirs(param_dir, exist_ok=True)
 
-study = optuna.study.load_study(study_name="DQN7 Study 1", storage="sqlite:///HyperParamStudies.db")
+study = optuna.study.load_study(study_name='DQN7 Study 3', storage="sqlite:///HyperParamStudies.db")
 
 fig = plot_parallel_coordinate(study)
 fig.write_html(param_dir + f'parallel coordinates {rundate}.html' )

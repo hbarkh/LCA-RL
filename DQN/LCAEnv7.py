@@ -2366,6 +2366,10 @@ class LCAEnv(Env):
         self.pt, self.prev_err = Get_Pt(self.prev_err, int(self.t))
         #Update State Variables
 
+        """
+        Force no repairs below IRI of 1.4
+        """
+
         if action < 5:
             self.age = 0
             self.T_last = 0
