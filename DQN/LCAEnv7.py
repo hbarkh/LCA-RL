@@ -2405,7 +2405,7 @@ class LCAEnv(Env):
         #print(type(self.state.tolist()))
         info = {'state':self.state,'action':action,'total_cost':total_cost,'total_gwp':total_gwp} #todo: modify this to return episode-wise by making cost, reward methods and appending during rest.
         #adding state to this info dict breaks the whole thing
-        self.info.append(info)
+        #self.info.append(info) # to store as attribute for calling env.info if need be later
 
         #store state
         self.state = np.array([self.t/50,self.age/50,self.sn/6.37,self.iri/3.76,self.scen/6,self.aadtt/AADT_INITIAL,self.pt/250])
