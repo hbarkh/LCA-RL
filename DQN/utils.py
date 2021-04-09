@@ -34,5 +34,5 @@ def plot_results(log_folder, title='Learning Curve'):
     plt.xlabel('Number of Timesteps')
     plt.ylabel('Rewards')
     plt.title(title + "  - 5 Episode Moving Average")
-    plt.savefig(results_dir + f"5 ep MA {rundate} .png")
-    plt.show()
+    plt.savefig(results_dir + f"{title} - 5 ep MA {rundate} .png")
+    #plt.show()

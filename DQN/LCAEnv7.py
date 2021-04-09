@@ -2283,12 +2283,20 @@ class LCAEnv(Env):
     
     
     
-    def __init__(self):
+    def __init__(self, gwp_weight = 1, iri_lower = 1.36):
+        """
+        :param gwp_weight: gwp preference [0,1]. Implies cost preference = 1 - gwp preference
+        :param iri_lower: lower bound for iri m/km
+        """
+
+
+
+
         # Actions we can take
         self.action_space = Discrete(7) #0-6
         # States array
         # time = [0:50]/50, age = [0:50]/50, sn = [3.65,4.44,5.22,6.00,6.37]/6.37 , iri = [1.36:3.76]/3.76 , scenario = [0:5]/5, aadt = aadtt/aadt_initial, pt = [90:250]/250
-        self.observation_space = Box(low=np.array([0,0,3.65/6.37,1.36/3.76,1/6,AADTT_INITIAL/AADT_INITIAL,0.36]), high=np.array([1,1,1,1,1,1,1]))
+        self.observation_space = Box(low=np.array([0,0,3.65/6.37,iri_lower/3.76,1/6,AADTT_INITIAL/AADT_INITIAL,0.36]), high=np.array([1,1,1,1,1,1,1]))
 
         
         # For discrete space use:
@@ -2335,7 +2343,8 @@ class LCAEnv(Env):
         self.traffic_dict['percent_non_trucks_impacted'] = PERCENT_NON_TRUCKS_IMPACTED_INITIAL
 
         Get_Truck_Weights()
-        
+
+        self.gwp_weight = gwp_weight
         
         #Set State Array
         self.state = np.array([self.t/50,self.age/50,self.sn/6.37,self.iri/3.76,self.scen/6,self.aadtt/AADT_INITIAL,self.pt/250])
@@ -2347,6 +2356,7 @@ class LCAEnv(Env):
         
                
     def step(self, action):
+
 
     
         
@@ -2461,7 +2471,7 @@ class LCAEnv(Env):
         #calculate gwp
         total_gwp = lighting+albedo+roughness+deflection+embodied+eol+congestion
 
-        reward = total_gwp/1e6
+        reward = (self.gwp_weight * total_gwp/1e6) + ((1 - self.gwp_weight) * total_cost/1e5)
         reward = -reward #minimize gwp
         
         
