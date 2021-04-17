@@ -15,7 +15,7 @@ results_dir = "DQN Results/"
 
 MODEL_NAME = "LCA Env 7 GWP Weight "
 
-gwp_weights = [10,20,30,40,50,60,70,80,90,100]
+gwp_weights = [0,10,20,30,40,50,60,70,80,90,100]
 validation_results = []
 
 for weight in gwp_weights:
